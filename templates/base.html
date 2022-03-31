@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -11,9 +12,11 @@
     <div class="container">
       <a href="/" class="navbar-brand text-light">Flask-Feedback</a>
       <ul class="nav navbar-nav flex-row float-right">
-        {% if session['user_id'] %}
+        {% if session['username'] %}
         <li class="nav-item">
           <a class="nav-link pr-3 text-light" href="/logout">Logout</a>
+        </li>
+        <li class="nav-item"><a class="nav-link pr-3 text-light" href="/users/{{ session['username'] }}">Profile</a>
         </li>
         {% else %}
         <li class="nav-item">
@@ -23,6 +26,7 @@
           <a class="nav-link text-light" href="/register">Sign up</a>
         </li>
         {% endif %}
+        <li class="nav-item"><a class="nav-link pr-3 text-light" href="/users">Users</a>
       </ul>
     </div>
   </nav>

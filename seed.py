@@ -1,10 +1,12 @@
-from models import db, User
+from models import db, User, Feedback
 from app import app
+from flask_sqlalchemy import SQLAlchemy
 
 db.drop_all()
 db.create_all()
 
 User.query.delete()
+Feedback.query.delete()
 
 u1 = User.register(
     username = "mikeymike",
@@ -19,6 +21,8 @@ password = u1.password
 email = u1.email
 first_name = u1.first_name
 last_name = u1.last_name
+
+
 
 
 

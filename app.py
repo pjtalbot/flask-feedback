@@ -1,10 +1,17 @@
+from crypt import methods
 import pdb
 from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
-from models import connect_db, db ,User
-from forms import UserForm, ClearForm, LoginForm
+from models import connect_db, db ,User, Feedback
+from forms import FeedbackForm, UserForm, ClearForm, LoginForm
 from sqlalchemy.exc import IntegrityError
 
+
+# add Unauthorized()
+# make 404
+# add """""" docs
+# practice making tests?
+# organize templates / rename
 
 
 app = Flask(__name__)
@@ -22,6 +29,11 @@ connect_db(app)
 @app.route('/')
 def home_page():
     return redirect('/register')
+
+@app.route('/users')
+def list_users():
+    users = User.query.all()
+    return render_template('users.html', users=users)
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup():
@@ -50,6 +62,32 @@ def signup():
     else:
          return render_template('index.html', form=form)
 
+@app.route('/feedback/new', methods=["GET", "POST"])
+def show_feedback_form():
+    form = FeedbackForm()
+
+    if not session['username']:
+        redirect ('/login')
+
+    elif form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        username = session['username']
+
+        new_feedback = Feedback(title=title, content=content, username=username)
+
+        db.session.add(new_feedback)
+        db.session.commit()
+
+        return redirect(f'/users/{username}')
+
+
+    return render_template('new_feedback.html', form=form)
+
+# @app.route('/feedback/new', methods=["POST"])
+# def create_feedback():
+
+
 
 
 
@@ -69,7 +107,7 @@ def signup():
 @app.route('/login', methods=["GET", "POST"])
 def login():
 
-    session.clear()
+    # session.clear()
 
     form = LoginForm()
 
@@ -99,8 +137,70 @@ def show_user_homepage(username):
 
     user = User.query.get(username)
 
-    
     form = ClearForm()
 
     return render_template('loggedin.html', form=form, user=user)
 
+@app.route("/logout")
+def logout():
+    """Logout route."""
+
+    # use pop? or is another session method better?
+
+    session.pop("username")
+    return redirect("/login")
+
+@app.route("/feedback/<int:feedback_id>", methods=["GET", "POST"])
+def display_feedback(feedback_id):
+    feedback = Feedback.query.get(feedback_id)
+
+    return render_template('feedback.html', feedback=feedback)
+
+@app.route("/feedback/<int:feedback_id>/edit", methods=["GET", "POST"])
+def edit_feedback(feedback_id):
+    feedback = Feedback.query.get(feedback_id)
+
+    form = FeedbackForm(obj=feedback)
+
+    if form.validate_on_submit():
+        feedback.title = form.title.data
+        feedback.content = form.content.data
+
+        db.session.commit()
+
+        return redirect(f'/feedback/{feedback.id}')
+
+    return render_template('feedback_edit.html', feedback=feedback, form=form)
+
+@app.route('/feedback/<int:feedback_id>/delete', methods=['POST'])
+def delete_feedback(feedback_id):
+    feedback = Feedback.query.get(feedback_id)
+
+    if session['username'] == feedback.username:
+        db.session.delete(feedback)
+        db.session.commit()
+        # add flash message
+    return redirect(f'/users/{feedback.username}')
+
+@app.route("/users/<username>/delete", methods=["POST"])
+def delete_user(username):
+
+    
+
+    feedback = Feedback.query.filter(Feedback.username == username)
+
+    for f in feedback:
+
+        db.session.delete(f)
+    
+    db.session.commit()
+
+    user = User.query.get(username)
+
+    db.session.delete(user)
+    db.session.commit()
+    
+    session.pop('username')
+
+    return redirect('/login')
+    

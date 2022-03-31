@@ -4,6 +4,31 @@
 <h1>{{ user.username}}</h1>
 
 <h2>{{user.first_name}} {{user.last_name}}</h2>
+
+<ul>
+{% for feedback in user.feedback %}
+<li><a href="/feedback/{{ feedback.id }}" > - {{ feedback.title }}</a><p>{{ feedback.content }}</p>
+  {% if session['username'] == feedback.username %} <form>
+    
+    <button class="btn btn-primary"
+            formmethod="GET"
+            formaction="/feedback/{{ feedback.id }}/edit">
+      Edit
+    </button>
+    <button class="btn btn-danger"
+            formmethod="POST"
+            formaction="/feedback/{{ feedback.id }}/delete">
+      Delete
+    </button>
+  </form>
+  
+  {% endif %}
+
+</li>
+
+{% endfor %}
+
+</ul>
 <form method="POST">{{ form.hidden_tag() }}
 
     {% for field in form
@@ -17,6 +42,21 @@
       {% endfor %}
     </p>
     {% endfor %}
+    
+
+    <a href="/feedback/new">Make Feedback</a>
+
+    {% if session['username'] == user.username %}
+
+    <form action="">
+      <button class="btn btn-danger"
+            formmethod="POST"
+            formaction="/users/{{ user.username }}/delete">
+      Delete Your Account
+    </button>
+    </form>
+
+    {% endif %}
 
     
 

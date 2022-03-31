@@ -1,0 +1,27 @@
+{% extends 'base.html'  %}
+
+{% block content %}
+<h1>Feedback</h1>
+<h2>{{ feedback.title }}</h2>
+<p>Written by {{ feedback.username }}</p>
+<p>{{ feedback.content }}</p>
+{% if session['username'] == feedback.username %}
+{% if session['username'] == feedback.username %} <form>
+    
+    <button class="btn btn-primary"
+            formmethod="GET"
+            formaction="/feedback/{{ feedback.id }}/edit">
+      Edit
+    </button>
+    <button class="btn btn-danger"
+            formmethod="POST"
+            formaction="/feedback/{{ feedback.id }}/delete">
+      Delete
+    </button>
+  </form>
+  {% endif %}
+
+{% endif %}
+
+
+{% endblock %}

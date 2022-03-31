@@ -1,5 +1,7 @@
 from enum import unique
+# from msilib.schema import Class
 from multiprocessing import AuthenticationError
+# from tkinter import CASCADE
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
@@ -19,6 +21,8 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
+
+    feedback = db.relationship('Feedback', backref="user", cascade="all,delete")
 
     @classmethod
     def register(cls, username, password, email, first_name, last_name):
@@ -55,6 +59,15 @@ class User(db.Model):
     #         "image": self.image,
     #     }
         
+class Feedback(db.Model):
+    """Model for Feedback posts"""
+
+    __tablename__= "feedback"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(30), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    username = db.Column(db.String(30), db.ForeignKey('users.username'), nullable=False)
 
 def connect_db(app):
     db.app = app
